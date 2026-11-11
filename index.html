@@ -216,6 +216,13 @@ a.btn{text-decoration:none}
 .modal p{font-size:.9rem;color:var(--tinta-2);line-height:1.5;margin-bottom:16px}
 .modal .luki{margin:0 auto}
 @media (max-width:380px){.dos{grid-template-columns:1fr}.saldo{font-size:2.6rem}}
+.paso-y{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;text-align:left;background:#F5F8F7;border-radius:18px;padding:12px 14px;margin:10px 0}
+.paso-y .pn{width:28px;height:28px;border-radius:50%;background:var(--tinta);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:.88rem;grid-row:span 3;align-self:start;margin-top:2px}
+.paso-y p{margin:0;font-size:.86rem;color:var(--tinta-2);line-height:1.4}
+.paso-y .dato{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.03em;color:var(--tinta);word-break:break-all}
+.paso-y .cbtn{justify-self:start;border:1.5px solid var(--tinta);border-radius:999px;background:transparent;color:var(--tinta);padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;margin-top:4px}
+.paso-y .cbtn.principal{background:var(--tinta);color:#fff}
+.paso-y .ojo-y{font-size:.76rem;color:var(--gris)}
 
 /* ===== Juego ===== */
 .chip-in{border:0;background:var(--tinta);color:#fff;border-radius:999px;padding:8px 16px;font-family:var(--display);font-weight:600;font-size:.86rem;cursor:pointer}
@@ -535,10 +542,17 @@ a.btn{text-decoration:none}
     </div>
     <div id="tkLuk" class="pagado"><span class="check-ok">✓</span><div><b>Pagado con 1 Lukita</b><small id="tkQuedan">-</small></div></div>
     <div id="tkYape" class="pago">
-      <p>Yapea</p><div class="monto">S/ 1</div>
-      <p>al número</p><div class="yape" id="yapeNum">-</div>
-      <p>con el <b>código de tu ticket</b> en el concepto. Hazlo antes de las <b id="tkCierre">-</b></p>
-      <div class="copiar"><button type="button" onclick="copiar(ultimoTicket.codigo,'Código copiado')">Copiar código</button><button type="button" onclick="copiar(NUMERO_YAPE,'Número copiado')">Copiar número</button></div>
+      <div class="paso-y"><span class="pn">1</span>
+        <p>Yapea <b>S/ 1</b> a este número:</p>
+        <div class="dato" id="yapeNum">-</div>
+        <button type="button" class="cbtn" onclick="copiar(NUMERO_YAPE,'Número copiado. Úsalo para buscar a quién yapear. ¡No va en el concepto!')">Copiar número</button>
+      </div>
+      <div class="paso-y"><span class="pn">2</span>
+        <p>En el <b>concepto</b> del Yape pega tu código:</p>
+        <div class="dato" id="tkCodigo2">-</div>
+        <button type="button" class="cbtn principal" onclick="copiar(ultimoTicket.codigo,'Código copiado. Pégalo en el concepto de tu Yape.')">Copiar código</button>
+      </div>
+      <p>Tienes hasta las <b id="tkCierre">-</b> para yapear.</p><p>Sin el código en el concepto no sabemos de quién es el pago.</p>
       <a href="#" id="voucherBtn" target="_blank" rel="noopener" class="link" style="display:inline-block;margin-top:6px">Enviar voucher por WhatsApp (opcional)</a>
     </div>
     <button type="button" class="btn" onclick="jugarOtraVez()">Jugar otra vez</button>
@@ -626,7 +640,7 @@ function ocupado(b, si, t) { b.disabled = si; if (t != null) b.innerHTML = t; }
 function ir(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 'sHist') loadHistory(); if (id === 'sConsulta') pintarMisTickets(); }
 function verPass(id, b) { const i = $(id); i.type = i.type === 'password' ? 'text' : 'password'; b.innerText = i.type === 'password' ? 'Ver' : 'Ocultar'; }
-function copiar(t, m) { const ok = () => luki('ticket', 'fiesta', `${m}. ¡Pégalo en tu Yape!`); if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => prompt('Copia:', t)); else prompt('Copia:', t); }
+function copiar(t, m) { const ok = () => luki('ticket', 'fiesta', m); if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => prompt('Copia:', t)); else prompt('Copia:', t); }
 function modal(t, x, e = 'fiesta') { $('mdT').innerText = t; $('mdX').innerHTML = x; $('velo').classList.add('on'); luki('modal', e); }
 
 /* ================== LUKI ================== */
@@ -925,7 +939,7 @@ let ultimoTicket = null;
 function guardarTicket(t) { misTickets = [{ codigo: t.codigo, id: t.id, fecha: t.fecha, hora: t.hora, numeros: t.numeros }, ...misTickets].slice(0, 30); guardarLocal(JUEGO.local + 'tickets', misTickets); }
 function mostrarTicket(tk, medio, saldo) {
   ultimoTicket = tk;
-  $('tkCodigo').innerText = tk.codigo; $('tkSorteo').innerText = `Sorteo de ${diaRel(tk.fecha)} a las ${horaTexto(tk.hora)}`;
+  $('tkCodigo').innerText = tk.codigo; $('tkCodigo2').innerText = tk.codigo; $('tkSorteo').innerText = `Sorteo de ${diaRel(tk.fecha)} a las ${horaTexto(tk.hora)}`;
   $('tkNumeros').innerHTML = bolas(tk.numeros, [], true);
   $('tkLuk').style.display = medio === 'LUKITAS' ? 'flex' : 'none'; $('tkYape').style.display = medio === 'LUKITAS' ? 'none' : 'block';
   if (medio === 'LUKITAS') $('tkQuedan').innerText = saldo === 0 ? 'Te quedan 0 Lukitas. ¡Recarga para seguir jugando!' : `Te quedan ${saldo} Lukita${saldo === 1 ? '' : 's'}. Ya estás participando.`;
